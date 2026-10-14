@@ -1,0 +1,14 @@
+{
+  "lr": {
+    "regParam": 0.1,
+    "elasticNetParam": 0.0,
+    "maxIter": 100,
+    "threshold": 0.45
+  },
+  "rf": {
+    "numTrees": 200,
+    "maxDepth": 6,
+    "minInstancesPerNode": 5,
+    "featureSubsetStrategy": "auto"
+  }
+}
