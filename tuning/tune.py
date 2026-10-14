@@ -35,11 +35,15 @@ from pyspark.ml.functions import vector_to_array
 # -----------------------------
 # Args
 # -----------------------------
+# Defaults resolve relative to this file: data at repo root, results next to this script
+TUNING_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_DIR = os.path.dirname(TUNING_DIR)
+
 def parse_args():
     p = argparse.ArgumentParser(description="Time-aware tuning for LR and RF (OHE + season split support)")
-    p.add_argument("--csv_path", type=str, default="matches_serie_A.csv")
+    p.add_argument("--csv_path", type=str, default=os.path.join(REPO_DIR, "matches_serie_A.csv"))
     p.add_argument("--window", type=int, default=5)
-    p.add_argument("--out_dir", type=str, default="outputs")
+    p.add_argument("--out_dir", type=str, default=TUNING_DIR)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--split_mode", type=str, default="percentile", choices=["percentile","season"],
                    help="percentile: use date percentiles; season: last season=test, prev=train/val split by season")

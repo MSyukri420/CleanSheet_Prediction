@@ -1,4 +1,5 @@
 import os
+import argparse
 from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 from pyspark.ml import Pipeline
@@ -9,10 +10,16 @@ from pyspark.ml.functions import vector_to_array
 from pyspark.ml.classification import LogisticRegression as LRCal
 from pyspark.ml.feature import VectorAssembler as VAsm
 
-# configuration 
+# configuration (paths default to locations relative to this file, so it runs from any cwd)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+parser = argparse.ArgumentParser(description="Serie A clean-sheet forecasting")
+parser.add_argument("--csv_path", type=str, default=os.path.join(BASE_DIR, "matches_serie_A.csv"))
+parser.add_argument("--out_dir", type=str, default=os.path.join(BASE_DIR, "outputs"))
+args = parser.parse_args()
+
 CFG = {
-    "CSV_PATH": "matches_serie_A.csv",
-    "OUT_DIR": r"C:\Users\Syukri\Desktop\project - ID 15931256\output",
+    "CSV_PATH": args.csv_path,
+    "OUT_DIR": args.out_dir,
     "N_BACK": 5,
     "TEST_SEASON_START": 2024,   
     "SEED": 15,
@@ -241,7 +248,7 @@ else:
     q_lo, q_hi = train_raw.approxQuantile("p1_rf", [0.40, 0.80], 0.001)
     band_source_col = "p1_rf"
 
-print(f"[TRAIN cutoffs] Low < {q_lo:.3f} | Medium < {q_hi:.3f} | High ≥ {q_hi:.3f}")
+print(f"[TRAIN cutoffs] Low < {q_lo:.3f} | Medium < {q_hi:.3f} | High >= {q_hi:.3f}")
 
 pred_test = pred_test.withColumn(
     "readiness_band",
@@ -302,7 +309,10 @@ keep_cols = [
     "Date", "Season", "Team", "Opponent", "Venue", "home", "cs",
     "p1_lr", "p1_rf", "p1_rf_calib", "prediction_lr", "prediction_rf", "readiness_band"
 ]
-pred_pdf = pred_test.select(*keep_cols).toPandas()
+pred_pdf = (pred_test.select(*keep_cols)
+            .withColumn("prediction_lr", F.col("prediction_lr").cast("int"))
+            .withColumn("prediction_rf", F.col("prediction_rf").cast("int"))
+            .toPandas())
 pred_pdf.sort_values("Date", inplace=True)
 write_csv_pd(pred_pdf, "model_predictions.csv")
 

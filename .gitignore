@@ -1,0 +1,13 @@
+# Virtual environments (recreate with: pip install -r requirements.txt)
+.venv/
+venv/
+spark_env/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Spark local artifacts
+spark-warehouse/
+metastore_db/
+derby.log

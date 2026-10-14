@@ -29,7 +29,7 @@
       <connection class='federated'>
         <named-connections>
           <named-connection caption='model_metrics' name='textscan.0flir4c0gmxy1s141jruo1rri5nd'>
-            <connection class='textscan' directory='C:/Users/Syukri/OneDrive - Personal/OneDrive/DS Big Data/outputs' filename='model_metrics.csv' password='' server='' workgroup-auth-mode='as-is' />
+            <connection class='textscan' directory='C:/Users/Syukri/Desktop/Github Repo/CleanSheet_Prediction/outputs' filename='model_metrics.csv' password='' server='' workgroup-auth-mode='as-is' />
           </named-connection>
         </named-connections>
         <relation name='Pivot' type='pivot'>
@@ -38,7 +38,7 @@
             <column datatype='real' name='Pivot Field Values' />
           </columns>
           <tag name='Pivot Field Names'>
-            <value name='[AUC]' />
+            <value name='[ROC_AUC]' />
             <value name='[Accuracy]' />
             <value name='[F1]' />
             <value name='[Precision]' />
@@ -46,7 +46,7 @@
           </tag>
           <groups>
             <group name='Pivot Field Values'>
-              <field name='[model_metrics.csv].[AUC]' />
+              <field name='[model_metrics.csv].[ROC_AUC]' />
               <field name='[model_metrics.csv].[Accuracy]' />
               <field name='[model_metrics.csv].[F1]' />
               <field name='[model_metrics.csv].[Precision]' />
@@ -56,12 +56,13 @@
           <relation connection='textscan.0flir4c0gmxy1s141jruo1rri5nd' name='model_metrics.csv' table='[model_metrics#csv]' type='table'>
             <columns character-set='UTF-8' header='yes' locale='en_MY' separator=','>
               <column datatype='string' name='Model' ordinal='0' />
-              <column datatype='real' name='AUC' ordinal='1' />
-              <column datatype='real' name='Accuracy' ordinal='2' />
-              <column datatype='real' name='Precision' ordinal='3' />
-              <column datatype='real' name='Recall' ordinal='4' />
-              <column datatype='real' name='F1' ordinal='5' />
-              <column datatype='real' name='DecisionThresholdUsed' ordinal='6' />
+              <column datatype='real' name='ROC_AUC' ordinal='1' />
+              <column datatype='real' name='PR_AUC' ordinal='2' />
+              <column datatype='real' name='Accuracy' ordinal='3' />
+              <column datatype='real' name='Precision' ordinal='4' />
+              <column datatype='real' name='Recall' ordinal='5' />
+              <column datatype='real' name='F1' ordinal='6' />
+              <column datatype='real' name='Brier' ordinal='7' />
             </columns>
           </relation>
         </relation>
@@ -99,18 +100,6 @@
             <object-id>[model_metrics.csv_6A2067B3994040BD859DF1D0D30F5FF3]</object-id>
           </metadata-record>
           <metadata-record class='column'>
-            <remote-name>DecisionThresholdUsed</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[DecisionThresholdUsed]</local-name>
-            <parent-name>[model_metrics.csv]</parent-name>
-            <remote-alias>DecisionThresholdUsed</remote-alias>
-            <ordinal>1</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_metrics.csv_6A2067B3994040BD859DF1D0D30F5FF3]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
             <remote-name>Pivot Field Names</remote-name>
             <remote-type>129</remote-type>
             <local-name>[Pivot Field Names]</local-name>
@@ -137,71 +126,9 @@
         </metadata-records>
       </connection>
       <aliases enabled='yes' />
-      <column caption='Decision Threshold Used' datatype='real' name='[DecisionThresholdUsed]' role='measure' type='quantitative' />
       <column caption='Metric' datatype='string' name='[Pivot Field Names]' role='dimension' type='nominal' />
       <column caption='Value' datatype='real' name='[Pivot Field Values]' role='measure' type='quantitative' />
       <column caption='model_metrics.csv' datatype='table' name='[__tableau_internal_object_id__].[model_metrics.csv_6A2067B3994040BD859DF1D0D30F5FF3]' role='measure' type='quantitative' />
-      <extract _.fcp.VConnDownstreamExtractsWithWarnings.true...user-specific='false' count='-1' enabled='true' object-id='' units='records'>
-        <connection access_mode='readonly' author-locale='en_US' class='hyper' dbname='C:/Users/Syukri/AppData/Local/Temp/TableauTemp/#TableauTemp_0k8z2m91jmjzsn1456mq31cl74ta.hyper' default-settings='hyper' schema='Extract' sslmode='' tablename='Extract' update-time='08/14/2025 03:55:40 AM' username='tableau_internal_user'>
-          <relation name='Extract' table='[Extract].[Extract]' type='table' />
-          <metadata-records>
-            <metadata-record class='column'>
-              <remote-name>Model</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[Model]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Model</remote-alias>
-              <ordinal>0</ordinal>
-              <family>model_metrics.csv</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>2</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='LEN_RGB' />
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>DecisionThresholdUsed</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[DecisionThresholdUsed]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>DecisionThresholdUsed</remote-alias>
-              <ordinal>1</ordinal>
-              <family>model_metrics.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>1</approx-count>
-              <contains-null>true</contains-null>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>Pivot Field Names</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[Pivot Field Names]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Pivot Field Names</remote-alias>
-              <ordinal>2</ordinal>
-              <family>Pivot</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>5</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='binary' />
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>Pivot Field Values</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[Pivot Field Values]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Pivot Field Values</remote-alias>
-              <ordinal>3</ordinal>
-              <family>Pivot</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>10</approx-count>
-              <contains-null>true</contains-null>
-            </metadata-record>
-          </metadata-records>
-        </connection>
-      </extract>
       <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
       <semantic-values>
         <semantic-value key='[Country].[Name]' value='&quot;Malaysia&quot;' />
@@ -217,7 +144,7 @@
                   <column datatype='real' name='Pivot Field Values' />
                 </columns>
                 <tag name='Pivot Field Names'>
-                  <value name='[AUC]' />
+                  <value name='[ROC_AUC]' />
                   <value name='[Accuracy]' />
                   <value name='[F1]' />
                   <value name='[Precision]' />
@@ -225,7 +152,7 @@
                 </tag>
                 <groups>
                   <group name='Pivot Field Values'>
-                    <field name='[model_metrics.csv].[AUC]' />
+                    <field name='[model_metrics.csv].[ROC_AUC]' />
                     <field name='[model_metrics.csv].[Accuracy]' />
                     <field name='[model_metrics.csv].[F1]' />
                     <field name='[model_metrics.csv].[Precision]' />
@@ -235,12 +162,13 @@
                 <relation connection='textscan.0flir4c0gmxy1s141jruo1rri5nd' name='model_metrics.csv' table='[model_metrics#csv]' type='table'>
                   <columns character-set='UTF-8' header='yes' locale='en_MY' separator=','>
                     <column datatype='string' name='Model' ordinal='0' />
-                    <column datatype='real' name='AUC' ordinal='1' />
-                    <column datatype='real' name='Accuracy' ordinal='2' />
-                    <column datatype='real' name='Precision' ordinal='3' />
-                    <column datatype='real' name='Recall' ordinal='4' />
-                    <column datatype='real' name='F1' ordinal='5' />
-                    <column datatype='real' name='DecisionThresholdUsed' ordinal='6' />
+                    <column datatype='real' name='ROC_AUC' ordinal='1' />
+                    <column datatype='real' name='PR_AUC' ordinal='2' />
+                    <column datatype='real' name='Accuracy' ordinal='3' />
+                    <column datatype='real' name='Precision' ordinal='4' />
+                    <column datatype='real' name='Recall' ordinal='5' />
+                    <column datatype='real' name='F1' ordinal='6' />
+                    <column datatype='real' name='Brier' ordinal='7' />
                   </columns>
                 </relation>
               </relation>
@@ -256,7 +184,7 @@
       <connection class='federated'>
         <named-connections>
           <named-connection caption='rf_feature_importances' name='textscan.1kg0bbb0rn3idd17xx3r20ea8zwy'>
-            <connection class='textscan' directory='C:/Users/Syukri/OneDrive - Personal/OneDrive/DS Big Data/outputs' filename='rf_feature_importances.csv' password='' server='' workgroup-auth-mode='as-is' />
+            <connection class='textscan' directory='C:/Users/Syukri/Desktop/Github Repo/CleanSheet_Prediction/outputs' filename='rf_feature_importances.csv' password='' server='' workgroup-auth-mode='as-is' />
           </named-connection>
         </named-connections>
         <relation connection='textscan.1kg0bbb0rn3idd17xx3r20ea8zwy' name='rf_feature_importances.csv' table='[rf_feature_importances#csv]' type='table'>
@@ -316,42 +244,6 @@
       <column caption='rf_feature_importances.csv' datatype='table' name='[__tableau_internal_object_id__].[rf_feature_importances.csv_EF7BC7A709524159A0AE7FB8AF792C0A]' role='measure' type='quantitative' />
       <column caption='Feature' datatype='string' name='[feature]' role='dimension' type='nominal' />
       <column caption='Importance' datatype='real' name='[importance]' role='measure' type='quantitative' />
-      <extract _.fcp.VConnDownstreamExtractsWithWarnings.true...user-specific='false' count='-1' enabled='true' object-id='' units='records'>
-        <connection access_mode='readonly' author-locale='en_US' class='hyper' dbname='C:/Users/Syukri/AppData/Local/Temp/TableauTemp/#TableauTemp_0i0y9yw1uu1mdb175ev421h6va3z.hyper' default-settings='hyper' schema='Extract' sslmode='' tablename='Extract' update-time='08/14/2025 04:42:02 AM' username='tableau_internal_user'>
-          <relation name='Extract' table='[Extract].[Extract]' type='table' />
-          <metadata-records>
-            <metadata-record class='column'>
-              <remote-name>feature</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[feature]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>feature</remote-alias>
-              <ordinal>0</ordinal>
-              <family>rf_feature_importances.csv</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>61</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='LEN_RGB' />
-              <object-id>[rf_feature_importances.csv_EF7BC7A709524159A0AE7FB8AF792C0A]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>importance</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[importance]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>importance</remote-alias>
-              <ordinal>1</ordinal>
-              <family>rf_feature_importances.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>61</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[rf_feature_importances.csv_EF7BC7A709524159A0AE7FB8AF792C0A]</object-id>
-            </metadata-record>
-          </metadata-records>
-        </connection>
-      </extract>
       <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
       <semantic-values>
         <semantic-value key='[Country].[Name]' value='&quot;Malaysia&quot;' />
@@ -379,7 +271,7 @@
       <connection class='federated'>
         <named-connections>
           <named-connection caption='dataset_summary' name='textscan.0ifoenx0fjf0x911jbivd0zar0ca'>
-            <connection class='textscan' directory='C:/Users/Syukri/OneDrive - Personal/OneDrive/DS Big Data/outputs' filename='dataset_summary.csv' password='' server='' workgroup-auth-mode='as-is' />
+            <connection class='textscan' directory='C:/Users/Syukri/Desktop/Github Repo/CleanSheet_Prediction/outputs' filename='dataset_summary.csv' password='' server='' workgroup-auth-mode='as-is' />
           </named-connection>
         </named-connections>
         <relation connection='textscan.0ifoenx0fjf0x911jbivd0zar0ca' name='dataset_summary.csv' table='[dataset_summary#csv]' type='table'>
@@ -461,57 +353,6 @@
       </column>
       <column caption='Value' datatype='real' name='[value]' role='measure' type='quantitative' />
       <column caption='View' datatype='string' name='[view]' role='dimension' type='nominal' />
-      <extract _.fcp.VConnDownstreamExtractsWithWarnings.true...user-specific='false' count='-1' enabled='true' object-id='' units='records'>
-        <connection access_mode='readonly' author-locale='en_US' class='hyper' dbname='C:/Users/Syukri/AppData/Local/Temp/TableauTemp/#TableauTemp_0yzhlpj1vfmdnh18uu9p90ucsdce.hyper' default-settings='hyper' schema='Extract' sslmode='' tablename='Extract' update-time='08/14/2025 03:40:53 AM' username='tableau_internal_user'>
-          <relation name='Extract' table='[Extract].[Extract]' type='table' />
-          <metadata-records>
-            <metadata-record class='column'>
-              <remote-name>view</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[view]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>view</remote-alias>
-              <ordinal>0</ordinal>
-              <family>dataset_summary.csv</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>3</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='LEN_RGB' />
-              <object-id>[dataset_summary.csv_EBCCF874EFE248D6BEFDA10A0E1C9E0A]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>key</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[key]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>key</remote-alias>
-              <ordinal>1</ordinal>
-              <family>dataset_summary.csv</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>9</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='LEN_RGB' />
-              <object-id>[dataset_summary.csv_EBCCF874EFE248D6BEFDA10A0E1C9E0A]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>value</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[value]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>value</remote-alias>
-              <ordinal>2</ordinal>
-              <family>dataset_summary.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>7</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dataset_summary.csv_EBCCF874EFE248D6BEFDA10A0E1C9E0A]</object-id>
-            </metadata-record>
-          </metadata-records>
-        </connection>
-      </extract>
       <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-aliased-fields='true' show-structure='true' />
       <semantic-values>
         <semantic-value key='[Country].[Name]' value='&quot;Malaysia&quot;' />
@@ -540,7 +381,7 @@
       <connection class='federated'>
         <named-connections>
           <named-connection caption='model_predictions' name='textscan.1poeg281sdpg6l12vsvo50t16v8h'>
-            <connection class='textscan' directory='C:/Users/Syukri/OneDrive - Personal/OneDrive/DS Big Data/outputs' filename='model_predictions.csv' password='' server='' workgroup-auth-mode='as-is' />
+            <connection class='textscan' directory='C:/Users/Syukri/Desktop/Github Repo/CleanSheet_Prediction/outputs' filename='model_predictions.csv' password='' server='' workgroup-auth-mode='as-is' />
           </named-connection>
         </named-connections>
         <relation name='Pivot' type='pivot'>
@@ -554,29 +395,25 @@
           </tag>
           <groups>
             <group name='Pivot Field Values'>
-              <field name='[model_predictions.csv].[prob_LR]' />
-              <field name='[model_predictions.csv].[prob_RF]' />
+              <field name='[model_predictions.csv].[p1_lr]' />
+              <field name='[model_predictions.csv].[p1_rf]' />
             </group>
           </groups>
           <relation connection='textscan.1poeg281sdpg6l12vsvo50t16v8h' name='model_predictions.csv' table='[model_predictions#csv]' type='table'>
             <columns character-set='UTF-8' header='yes' locale='en_MY' separator=','>
               <column datatype='date' name='Date' ordinal='0' />
-              <column datatype='string' name='Team' ordinal='1' />
-              <column datatype='string' name='Opponent' ordinal='2' />
-              <column datatype='string' name='Venue' ordinal='3' />
-              <column datatype='integer' name='label' ordinal='4' />
-              <column datatype='real' name='roll_GA' ordinal='5' />
-              <column datatype='real' name='roll_xGA' ordinal='6' />
-              <column datatype='real' name='roll_SoT_conceded' ordinal='7' />
-              <column datatype='real' name='roll_poss' ordinal='8' />
-              <column datatype='real' name='opp_roll_GF' ordinal='9' />
-              <column datatype='real' name='opp_roll_xG' ordinal='10' />
-              <column datatype='real' name='opp_roll_SoT' ordinal='11' />
-              <column datatype='real' name='prob_LR' ordinal='12' />
-              <column datatype='integer' name='pred_LR' ordinal='13' />
-              <column datatype='real' name='lr_threshold_used' ordinal='14' />
-              <column datatype='real' name='prob_RF' ordinal='15' />
-              <column datatype='integer' name='pred_RF' ordinal='16' />
+              <column datatype='integer' name='Season' ordinal='1' />
+              <column datatype='string' name='Team' ordinal='2' />
+              <column datatype='string' name='Opponent' ordinal='3' />
+              <column datatype='string' name='Venue' ordinal='4' />
+              <column datatype='integer' name='home' ordinal='5' />
+              <column datatype='integer' name='cs' ordinal='6' />
+              <column datatype='real' name='p1_lr' ordinal='7' />
+              <column datatype='real' name='p1_rf' ordinal='8' />
+              <column datatype='real' name='p1_rf_calib' ordinal='9' />
+              <column datatype='integer' name='prediction_lr' ordinal='10' />
+              <column datatype='integer' name='prediction_rf' ordinal='11' />
+              <column datatype='string' name='readiness_band' ordinal='12' />
             </columns>
           </relation>
         </relation>
@@ -616,7 +453,7 @@
             <local-name>[Team]</local-name>
             <parent-name>[model_predictions.csv]</parent-name>
             <remote-alias>Team</remote-alias>
-            <ordinal>1</ordinal>
+            <ordinal>2</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <scale>1</scale>
@@ -631,7 +468,7 @@
             <local-name>[Opponent]</local-name>
             <parent-name>[model_predictions.csv]</parent-name>
             <remote-alias>Opponent</remote-alias>
-            <ordinal>2</ordinal>
+            <ordinal>3</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <scale>1</scale>
@@ -646,7 +483,7 @@
             <local-name>[Venue]</local-name>
             <parent-name>[model_predictions.csv]</parent-name>
             <remote-alias>Venue</remote-alias>
-            <ordinal>3</ordinal>
+            <ordinal>4</ordinal>
             <local-type>string</local-type>
             <aggregation>Count</aggregation>
             <scale>1</scale>
@@ -656,132 +493,36 @@
             <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
           </metadata-record>
           <metadata-record class='column'>
-            <remote-name>label</remote-name>
+            <remote-name>cs</remote-name>
             <remote-type>20</remote-type>
-            <local-name>[label]</local-name>
+            <local-name>[cs]</local-name>
             <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>label</remote-alias>
-            <ordinal>4</ordinal>
-            <local-type>integer</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>roll_GA</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[roll_GA]</local-name>
-            <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>roll_GA</remote-alias>
-            <ordinal>5</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>roll_xGA</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[roll_xGA]</local-name>
-            <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>roll_xGA</remote-alias>
+            <remote-alias>cs</remote-alias>
             <ordinal>6</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>roll_SoT_conceded</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[roll_SoT_conceded]</local-name>
-            <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>roll_SoT_conceded</remote-alias>
-            <ordinal>7</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>roll_poss</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[roll_poss]</local-name>
-            <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>roll_poss</remote-alias>
-            <ordinal>8</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>opp_roll_GF</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[opp_roll_GF]</local-name>
-            <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>opp_roll_GF</remote-alias>
-            <ordinal>9</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>opp_roll_xG</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[opp_roll_xG]</local-name>
-            <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>opp_roll_xG</remote-alias>
-            <ordinal>10</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>opp_roll_SoT</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[opp_roll_SoT]</local-name>
-            <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>opp_roll_SoT</remote-alias>
-            <ordinal>11</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <contains-null>true</contains-null>
-            <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>pred_LR</remote-name>
-            <remote-type>20</remote-type>
-            <local-name>[pred_LR]</local-name>
-            <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>pred_LR</remote-alias>
-            <ordinal>12</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
             <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
           </metadata-record>
           <metadata-record class='column'>
-            <remote-name>lr_threshold_used</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[lr_threshold_used]</local-name>
+            <remote-name>prediction_lr</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[prediction_lr]</local-name>
             <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>lr_threshold_used</remote-alias>
-            <ordinal>13</ordinal>
-            <local-type>real</local-type>
+            <remote-alias>prediction_lr</remote-alias>
+            <ordinal>10</ordinal>
+            <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
             <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
           </metadata-record>
           <metadata-record class='column'>
-            <remote-name>pred_RF</remote-name>
+            <remote-name>prediction_rf</remote-name>
             <remote-type>20</remote-type>
-            <local-name>[pred_RF]</local-name>
+            <local-name>[prediction_rf]</local-name>
             <parent-name>[model_predictions.csv]</parent-name>
-            <remote-alias>pred_RF</remote-alias>
-            <ordinal>14</ordinal>
+            <remote-alias>prediction_rf</remote-alias>
+            <ordinal>11</ordinal>
             <local-type>integer</local-type>
             <aggregation>Sum</aggregation>
             <contains-null>true</contains-null>
@@ -821,7 +562,7 @@
         <calculation class='tableau' formula='AVG([Pivot Field Values])' />
       </column>
       <column caption='ActualRate' datatype='real' name='[Calculation_3596687294659936262]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='AVG(INT([label]))' />
+        <calculation class='tableau' formula='AVG(INT([cs]))' />
       </column>
       <column caption='IdentityLine ' datatype='real' name='[Calculation_3596687294661017607]' role='measure' type='quantitative'>
         <calculation class='tableau' formula='[Calculation_3596687294659862533]' />
@@ -832,281 +573,24 @@
         <calculation class='bin' decimals='-1' formula='[Pivot Field Values]' peg='0' size='0.1' />
       </column>
       <column caption='model_predictions.csv' datatype='table' name='[__tableau_internal_object_id__].[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]' role='measure' type='quantitative' />
-      <column aggregation='Sum' caption='Label' datatype='integer' name='[label]' role='dimension' type='ordinal'>
+      <column aggregation='Sum' caption='Label' datatype='integer' name='[cs]' role='dimension' type='ordinal'>
         <aliases>
           <alias key='0' value='Conceded' />
           <alias key='1' value='Clean Sheet' />
         </aliases>
       </column>
-      <column caption='Lr Threshold Used' datatype='real' name='[lr_threshold_used]' role='measure' type='quantitative' />
-      <column caption='opp roll GF' datatype='real' name='[opp_roll_GF]' role='measure' type='quantitative' />
-      <column caption='opp roll SoT' datatype='real' name='[opp_roll_SoT]' role='measure' type='quantitative' />
-      <column caption='opp roll xG' datatype='real' name='[opp_roll_xG]' role='measure' type='quantitative' />
-      <column aggregation='Sum' caption='pred LR' datatype='integer' name='[pred_LR]' role='dimension' type='ordinal'>
+      <column aggregation='Sum' caption='pred LR' datatype='integer' name='[prediction_lr]' role='dimension' type='ordinal'>
         <aliases>
           <alias key='0' value='Conceded' />
           <alias key='1' value='Clean Sheet' />
         </aliases>
       </column>
-      <column caption='pred RF' datatype='integer' name='[pred_RF]' role='measure' type='quantitative' />
-      <column caption='roll GA' datatype='real' name='[roll_GA]' role='measure' type='quantitative' />
-      <column caption='roll SoT conceded' datatype='real' name='[roll_SoT_conceded]' role='measure' type='quantitative' />
-      <column caption='Roll Poss' datatype='real' name='[roll_poss]' role='measure' type='quantitative' />
-      <column caption='roll xGA' datatype='real' name='[roll_xGA]' role='measure' type='quantitative' />
-      <column-instance column='[label]' derivation='Sum' name='[sum:label:ok]' pivot='key' type='ordinal' />
-      <extract _.fcp.VConnDownstreamExtractsWithWarnings.true...user-specific='false' count='-1' enabled='true' object-id='' units='records'>
-        <connection access_mode='readonly' author-locale='en_US' class='hyper' dbname='C:/Users/Syukri/AppData/Local/Temp/TableauTemp/#TableauTemp_0smypp40bt9tw91dnfrpp05x0ku5.hyper' default-settings='hyper' schema='Extract' sslmode='' tablename='Extract' update-time='08/14/2025 04:41:42 AM' username='tableau_internal_user'>
-          <relation name='Extract' table='[Extract].[Extract]' type='table' />
-          <metadata-records>
-            <metadata-record class='column'>
-              <remote-name>Date</remote-name>
-              <remote-type>133</remote-type>
-              <local-name>[Date]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Date</remote-alias>
-              <ordinal>0</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>date</local-type>
-              <aggregation>Year</aggregation>
-              <approx-count>130</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>Team</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[Team]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Team</remote-alias>
-              <ordinal>1</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>19</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='LEN_RGB' />
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>Opponent</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[Opponent]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Opponent</remote-alias>
-              <ordinal>2</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>19</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='LEN_RGB' />
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>Venue</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[Venue]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Venue</remote-alias>
-              <ordinal>3</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>2</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='LEN_RGB' />
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>label</remote-name>
-              <remote-type>20</remote-type>
-              <local-name>[label]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>label</remote-alias>
-              <ordinal>4</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>integer</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>2</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>roll_GA</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[roll_GA]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>roll_GA</remote-alias>
-              <ordinal>5</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>20</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>roll_xGA</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[roll_xGA]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>roll_xGA</remote-alias>
-              <ordinal>6</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>149</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>roll_SoT_conceded</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[roll_SoT_conceded]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>roll_SoT_conceded</remote-alias>
-              <ordinal>7</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>55</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>roll_poss</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[roll_poss]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>roll_poss</remote-alias>
-              <ordinal>8</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>149</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>opp_roll_GF</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[opp_roll_GF]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>opp_roll_GF</remote-alias>
-              <ordinal>9</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>21</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>opp_roll_xG</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[opp_roll_xG]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>opp_roll_xG</remote-alias>
-              <ordinal>10</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>158</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>opp_roll_SoT</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[opp_roll_SoT]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>opp_roll_SoT</remote-alias>
-              <ordinal>11</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>33</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>pred_LR</remote-name>
-              <remote-type>20</remote-type>
-              <local-name>[pred_LR]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>pred_LR</remote-alias>
-              <ordinal>12</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>integer</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>2</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>lr_threshold_used</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[lr_threshold_used]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>lr_threshold_used</remote-alias>
-              <ordinal>13</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>1</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>pred_RF</remote-name>
-              <remote-type>20</remote-type>
-              <local-name>[pred_RF]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>pred_RF</remote-alias>
-              <ordinal>14</ordinal>
-              <family>model_predictions.csv</family>
-              <local-type>integer</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>2</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>Pivot Field Names</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[Pivot Field Names]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Pivot Field Names</remote-alias>
-              <ordinal>15</ordinal>
-              <family>Pivot</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>2</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='binary' />
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>Pivot Field Values</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[Pivot Field Values]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>Pivot Field Values</remote-alias>
-              <ordinal>16</ordinal>
-              <family>Pivot</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>1352</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[model_predictions.csv_5F734A8AABE84012B2CA614E1A179CB5]</object-id>
-            </metadata-record>
-          </metadata-records>
-        </connection>
-      </extract>
+      <column caption='pred RF' datatype='integer' name='[prediction_rf]' role='measure' type='quantitative' />
+      <column-instance column='[cs]' derivation='Sum' name='[sum:cs:ok]' pivot='key' type='ordinal' />
       <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-aliased-fields='true' show-structure='true' />
       <style>
         <style-rule element='mark'>
-          <encoding attr='shape' field='[sum:label:ok]' type='shape'>
+          <encoding attr='shape' field='[sum:cs:ok]' type='shape'>
             <map to='circle'>
               <bucket>1</bucket>
             </map>
@@ -1135,29 +619,25 @@
                 </tag>
                 <groups>
                   <group name='Pivot Field Values'>
-                    <field name='[model_predictions.csv].[prob_LR]' />
-                    <field name='[model_predictions.csv].[prob_RF]' />
+                    <field name='[model_predictions.csv].[p1_lr]' />
+                    <field name='[model_predictions.csv].[p1_rf]' />
                   </group>
                 </groups>
                 <relation connection='textscan.1poeg281sdpg6l12vsvo50t16v8h' name='model_predictions.csv' table='[model_predictions#csv]' type='table'>
                   <columns character-set='UTF-8' header='yes' locale='en_MY' separator=','>
                     <column datatype='date' name='Date' ordinal='0' />
-                    <column datatype='string' name='Team' ordinal='1' />
-                    <column datatype='string' name='Opponent' ordinal='2' />
-                    <column datatype='string' name='Venue' ordinal='3' />
-                    <column datatype='integer' name='label' ordinal='4' />
-                    <column datatype='real' name='roll_GA' ordinal='5' />
-                    <column datatype='real' name='roll_xGA' ordinal='6' />
-                    <column datatype='real' name='roll_SoT_conceded' ordinal='7' />
-                    <column datatype='real' name='roll_poss' ordinal='8' />
-                    <column datatype='real' name='opp_roll_GF' ordinal='9' />
-                    <column datatype='real' name='opp_roll_xG' ordinal='10' />
-                    <column datatype='real' name='opp_roll_SoT' ordinal='11' />
-                    <column datatype='real' name='prob_LR' ordinal='12' />
-                    <column datatype='integer' name='pred_LR' ordinal='13' />
-                    <column datatype='real' name='lr_threshold_used' ordinal='14' />
-                    <column datatype='real' name='prob_RF' ordinal='15' />
-                    <column datatype='integer' name='pred_RF' ordinal='16' />
+                    <column datatype='integer' name='Season' ordinal='1' />
+                    <column datatype='string' name='Team' ordinal='2' />
+                    <column datatype='string' name='Opponent' ordinal='3' />
+                    <column datatype='string' name='Venue' ordinal='4' />
+                    <column datatype='integer' name='home' ordinal='5' />
+                    <column datatype='integer' name='cs' ordinal='6' />
+                    <column datatype='real' name='p1_lr' ordinal='7' />
+                    <column datatype='real' name='p1_rf' ordinal='8' />
+                    <column datatype='real' name='p1_rf_calib' ordinal='9' />
+                    <column datatype='integer' name='prediction_lr' ordinal='10' />
+                    <column datatype='integer' name='prediction_rf' ordinal='11' />
+                    <column datatype='string' name='readiness_band' ordinal='12' />
                   </columns>
                 </relation>
               </relation>
