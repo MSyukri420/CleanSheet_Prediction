@@ -354,7 +354,7 @@ view_ha = (
         .agg(F.avg(F.col("cs").cast("double")).alias("value"))
         .select(
             F.lit("home_away_rate").alias("view"),
-            F.col("home").cast("string").alias("key"),
+            F.when(F.col("home") == 1, "Home").otherwise("Away").alias("key"),
             F.col("value").cast("double").alias("value"),
         )
 )

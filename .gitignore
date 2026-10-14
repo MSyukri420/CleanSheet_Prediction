@@ -7,6 +7,9 @@ spark_env/
 __pycache__/
 *.py[cod]
 
+# Tableau autosave/recovery files
+~*.twbr
+
 # Spark local artifacts
 spark-warehouse/
 metastore_db/

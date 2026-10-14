@@ -1,8 +1,8 @@
 view,key,value
 target_distribution,1,899.0
 target_distribution,0,2669.0
-home_away_rate,1,0.2819506726457399
-home_away_rate,0,0.2219730941704036
+home_away_rate,Home,0.2819506726457399
+home_away_rate,Away,0.2219730941704036
 season_match_counts,2025,719.0
 season_match_counts,2023,718.0
 season_match_counts,2022,716.0
