@@ -83,6 +83,10 @@ python tuning/tune.py
 - **Shared options**: both scripts accept `--csv_path` and `--out_dir`.
 - **`main.py`**: reads its settings from `tuning/best_params.json` (`--params` to use another file), so re-running the tuning feeds straight into the next run.
 - **`tune.py`**: `--split_mode` defaults to `main`, which uses the same season boundaries as `main.py`.
+- **Reproducibility**:
+  - Logistic regression and Poisson tuning reproduce exactly.
+  - Random-forest validation scores can vary by up to about 0.02 F1 between runs, because Spark doesn't guarantee row order after joins, which changes the forest's random samples. Near-tied settings can swap places.
+  - `main.py` with a fixed `best_params.json` reproduced its outputs exactly in testing.
 - **Tableau**: after re-running `main.py`, refresh the extracts in Tableau (**Data → source → Extract → Refresh**) before taking new dashboard screenshots.
 
 ## Project layout
