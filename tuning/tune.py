@@ -10,7 +10,8 @@ Time-aware hyperparameter tuning for Serie A clean-sheet model (PySpark).
 - Searches compact grids:
     * LR: regParam, elasticNetParam; tunes threshold for F1(positive) on validation
     * RF: numTrees, maxDepth, minInstancesPerNode, featureSubsetStrategy
-- Saves sweep table to CSV and best params (incl. LR threshold) to JSON
+    * Poisson (goals conceded -> P(clean sheet) = exp(-lambda)): regParam; tunes threshold like LR
+- Saves sweep table to CSV and best params (incl. LR/Poisson thresholds) to JSON
 - Windows-safe local file writes (no Hadoop native IO required)
 """
 
@@ -26,8 +27,9 @@ from pyspark.sql.window import Window
 from pyspark.sql.types import DoubleType, IntegerType
 
 from pyspark.ml import Pipeline
-from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
+from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler, StandardScaler
 from pyspark.ml.classification import LogisticRegression, RandomForestClassifier
+from pyspark.ml.regression import GeneralizedLinearRegression
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator
 from pyspark.ml.functions import vector_to_array
 
@@ -109,6 +111,8 @@ def load_data(spark, path):
     missing = [c for c in REQUIRED if c not in df.columns]
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
+    # unify team names ("Internazionale" in Team vs "Inter" in Opponent breaks the opponent join)
+    df = df.replace({"Internazionale": "Inter"}, subset=["Team", "Opponent"])
     df = df.withColumn("Date", F.to_date("Date", "yyyy-MM-dd"))
     for col in ["GF", "GA", "xG", "xGA", "SoT", "Poss"]:
         df = df.withColumn(col, F.col(col).cast(DoubleType()))
@@ -317,10 +321,12 @@ def main():
         [1, 3, 5],                 # minInstancesPerNode
         ["auto", "sqrt", "log2"]   # featureSubsetStrategy
     ))
+    pois_grid = [0.0, 1e-3, 1e-2, 1e-1, 1.0]  # regParam (L2)
 
     rows = []
     best_lr = {"f1": -1.0}
     best_rf = {"f1": -1.0}
+    best_pois = {"f1": -1.0}
 
     # Tune LR
     for reg, l1ratio, iters in lr_grid:
@@ -347,6 +353,28 @@ def main():
         if f1 > best_lr["f1"]:
             best_lr = {"params": params, "precision": prec, "recall": rec, "f1": f1, "auc": auc, "acc": acc}
 
+    # Tune Poisson: models goals conceded, P(clean sheet) = exp(-expected goals conceded).
+    # Unweighted (it predicts counts, not the imbalanced label); features scaled so the L2 penalty is even.
+    scaler = StandardScaler(inputCol="features", outputCol="features_std", withMean=False).fit(fe_train)
+    fe_train_std, fe_val_std = scaler.transform(fe_train), scaler.transform(fe_val)
+    for reg in pois_grid:
+        pois = GeneralizedLinearRegression(
+            featuresCol="features_std", labelCol="GA", family="poisson", link="log",
+            predictionCol="exp_ga", maxIter=100, regParam=float(reg)
+        )
+        val_pred = pois.fit(fe_train_std).transform(fe_val_std).withColumn("p1", F.exp(-F.col("exp_ga")))
+
+        thr, (prec, rec, f1) = threshold_sweep(val_pred, "p1", thresholds=[0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5])
+        val_eval = val_pred.withColumn("yhat_best", (F.col("p1") >= F.lit(thr)).cast("double"))
+        auc = BinaryClassificationEvaluator(labelCol="label", rawPredictionCol="p1", metricName="areaUnderROC").evaluate(val_pred)
+        acc = MulticlassClassificationEvaluator(labelCol="label", predictionCol="yhat_best", metricName="accuracy").evaluate(val_eval)
+
+        params = {"regParam": reg, "threshold": thr}
+        rows.append(["POISSON", json.dumps(params), prec, rec, f1, auc, acc])
+
+        if f1 > best_pois["f1"]:
+            best_pois = {"params": params, "precision": prec, "recall": rec, "f1": f1, "auc": auc, "acc": acc}
+
     # Tune RF
     for trees, depth, minInst, fss in rf_grid:
         rf = RandomForestClassifier(
@@ -372,7 +400,8 @@ def main():
     # Save best params
     best = {
         "lr": best_lr["params"],
-        "rf": best_rf["params"]
+        "rf": best_rf["params"],
+        "poisson": best_pois["params"]
     }
     _ensure_writable_file(os.path.join(out_dir, "best_params.json"))
     with open(os.path.join(out_dir, "best_params.json"), "w", encoding="utf-8") as f:
@@ -380,6 +409,7 @@ def main():
 
     print("Best LR:", best_lr)
     print("Best RF:", best_rf)
+    print("Best Poisson:", best_pois)
     print(f"Saved grid results and best params under: {out_dir}")
 
     spark.stop()

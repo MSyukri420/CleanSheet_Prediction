@@ -9,6 +9,10 @@
     "numTrees": 200,
     "maxDepth": 6,
     "minInstancesPerNode": 5,
-    "featureSubsetStrategy": "auto"
+    "featureSubsetStrategy": "log2"
+  },
+  "poisson": {
+    "regParam": 0.1,
+    "threshold": 0.25
   }
 }

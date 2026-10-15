@@ -414,6 +414,9 @@
               <column datatype='integer' name='prediction_lr' ordinal='10' />
               <column datatype='integer' name='prediction_rf' ordinal='11' />
               <column datatype='string' name='readiness_band' ordinal='12' />
+              <column datatype='real' name='exp_goals_conceded' ordinal='13' />
+              <column datatype='real' name='p1_pois' ordinal='14' />
+              <column datatype='integer' name='prediction_pois' ordinal='15' />
             </columns>
           </relation>
         </relation>
@@ -638,6 +641,9 @@
                     <column datatype='integer' name='prediction_lr' ordinal='10' />
                     <column datatype='integer' name='prediction_rf' ordinal='11' />
                     <column datatype='string' name='readiness_band' ordinal='12' />
+                    <column datatype='real' name='exp_goals_conceded' ordinal='13' />
+                    <column datatype='real' name='p1_pois' ordinal='14' />
+                    <column datatype='integer' name='prediction_pois' ordinal='15' />
                   </columns>
                 </relation>
               </relation>

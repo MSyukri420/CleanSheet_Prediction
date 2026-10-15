@@ -1,10 +1,12 @@
 import os
+import json
 import argparse
 from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 from pyspark.ml import Pipeline
-from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
+from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler, StandardScaler
 from pyspark.ml.classification import LogisticRegression, RandomForestClassifier
+from pyspark.ml.regression import GeneralizedLinearRegression
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator
 from pyspark.ml.functions import vector_to_array
 from pyspark.ml.classification import LogisticRegression as LRCal
@@ -15,7 +17,21 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 parser = argparse.ArgumentParser(description="Serie A clean-sheet forecasting")
 parser.add_argument("--csv_path", type=str, default=os.path.join(BASE_DIR, "matches_serie_A.csv"))
 parser.add_argument("--out_dir", type=str, default=os.path.join(BASE_DIR, "outputs"))
+parser.add_argument("--params", type=str, default=os.path.join(BASE_DIR, "tuning", "best_params.json"),
+                    help="model hyperparameters selected by tuning/tune.py")
 args = parser.parse_args()
+
+# hyperparameters chosen on validation data by tuning/tune.py
+with open(args.params, encoding="utf-8") as f:
+    BEST = json.load(f)
+LR_PARAMS = BEST["lr"]
+RF_PARAMS = dict(
+    numTrees=int(BEST["rf"]["numTrees"]),
+    maxDepth=int(BEST["rf"]["maxDepth"]),
+    minInstancesPerNode=int(BEST["rf"]["minInstancesPerNode"]),
+    featureSubsetStrategy=str(BEST["rf"]["featureSubsetStrategy"]),
+)
+POIS_PARAMS = BEST["poisson"]
 
 CFG = {
     "CSV_PATH": args.csv_path,
@@ -60,6 +76,10 @@ for old, new in rename_map.items():
     if old in df.columns:
         df = df.withColumnRenamed(old, new)
 
+# unify team names: the source uses "Internazionale" in Team but "Inter" in Opponent,
+# which breaks the mirror join and drops Inter's matches
+df = df.replace({"Internazionale": "Inter"}, subset=["Team", "Opponent"])
+
 # labels and simple context
 df = df.withColumn("cs", (F.col("GA") == 0).cast("int"))
 df = df.withColumn("home", (F.col("Venue").isin(["Home", "H"]).cast("int")))
@@ -97,7 +117,8 @@ w_opp  = Window.partitionBy("Opponent").orderBy("Date").rowsBetween(-N, -1)
 
 # core engineered signals
 df = df.withColumn("def_overperf_roll", F.avg(F.col("xGA") - F.col("GA")).over(w_team))
-df = df.withColumn("att_overperf_roll_opp", F.avg(F.col("GF") - F.col("xG")).over(w_opp))
+# goals conceded by the opponent beyond the xG it allowed (positive = leakier than expected)
+df = df.withColumn("opp_def_underperf_roll", F.avg(F.col("GF") - F.col("xG")).over(w_opp))
 df = df.withColumn("CS_lastN", F.avg(F.col("cs")).over(w_team))
 
 # team rollings
@@ -110,21 +131,22 @@ team_roll_cols = {
 for c, expr in team_roll_cols.items():
     df = df.withColumn(c, expr)
 
-# opponent rollings
+# opponent defence: w_opp groups rows by Opponent, so GF/xG/SoT/Sh there are what other
+# teams produced against that opponent, i.e. the opponent's goals/xG/shots conceded
 opp_roll_cols = {
-    "opp_roll_GF": F.avg("GF").over(w_opp),
-    "opp_roll_xG": F.avg("xG").over(w_opp),
-    "opp_roll_SoT": F.avg("SoT").over(w_opp),
-    "opp_roll_Sh": F.avg("Sh").over(w_opp)
+    "opp_roll_GA": F.avg("GF").over(w_opp),
+    "opp_roll_xGA": F.avg("xG").over(w_opp),
+    "opp_roll_SoT_conceded": F.avg("SoT").over(w_opp),
+    "opp_roll_Sh_conceded": F.avg("Sh").over(w_opp)
 }
 for c, expr in opp_roll_cols.items():
     df = df.withColumn(c, expr)
 
 # drop early rows without full history
 key_rolls = [
-    "def_overperf_roll", "att_overperf_roll_opp", "CS_lastN",
+    "def_overperf_roll", "opp_def_underperf_roll", "CS_lastN",
     "roll_GA", "roll_xGA", "roll_SoT_conceded", "roll_poss",
-    "opp_roll_GF", "opp_roll_xG", "opp_roll_SoT", "opp_roll_Sh"
+    "opp_roll_GA", "opp_roll_xGA", "opp_roll_SoT_conceded", "opp_roll_Sh_conceded"
 ]
 for c in key_rolls:
     df = df.filter(F.col(c).isNotNull())
@@ -144,9 +166,9 @@ print("Train rows:", train_df.count(), "> Test rows:", test_df.count())
 cat_cols = ["Team", "Opponent"]
 num_cols = [
     "home",
-    "def_overperf_roll", "att_overperf_roll_opp", "CS_lastN",
+    "def_overperf_roll", "opp_def_underperf_roll", "CS_lastN",
     "roll_GA", "roll_xGA", "roll_SoT_conceded", "roll_poss",
-    "opp_roll_GF", "opp_roll_xG", "opp_roll_SoT", "opp_roll_Sh"
+    "opp_roll_GA", "opp_roll_xGA", "opp_roll_SoT_conceded", "opp_roll_Sh_conceded"
 ]
 indexers = [StringIndexer(inputCol=c, outputCol=f"{c}_idx", handleInvalid="keep") for c in cat_cols]
 encoders = [OneHotEncoder(inputCols=[f"{c}_idx" for c in cat_cols],
@@ -181,18 +203,33 @@ lr = LogisticRegression(
     featuresCol="features", labelCol="cs", weightCol="class_weight",
     predictionCol="prediction_lr", rawPredictionCol="raw_lr",
     probabilityCol="probability_lr",
-    maxIter=100, regParam=0.0, elasticNetParam=0.0
+    maxIter=int(LR_PARAMS["maxIter"]), regParam=float(LR_PARAMS["regParam"]),
+    elasticNetParam=float(LR_PARAMS["elasticNetParam"]),
+    threshold=float(LR_PARAMS.get("threshold", 0.5))
 )
 rf = RandomForestClassifier(
     featuresCol="features", labelCol="cs", weightCol="class_weight",
     predictionCol="prediction_rf", rawPredictionCol="raw_rf",
     probabilityCol="probability_rf",
-    numTrees=200, maxDepth=10, seed=CFG["SEED"]
+    seed=CFG["SEED"], **RF_PARAMS
 )
+print("LR params:", LR_PARAMS, "| RF params:", RF_PARAMS, "| Poisson params:", POIS_PARAMS)
 lr_model = lr.fit(train_fe)
 rf_model = rf.fit(train_fe)
 pred_test = lr_model.transform(test_fe)
 pred_test = rf_model.transform(pred_test)
+
+# Poisson model of goals conceded: a clean sheet is GA = 0, so P(clean sheet) = exp(-expected GA).
+# Learns from full scorelines and needs no class weights; features scaled so the L2 penalty is even.
+scaler = StandardScaler(inputCol="features", outputCol="features_std", withMean=False).fit(train_fe)
+pois_model = GeneralizedLinearRegression(
+    featuresCol="features_std", labelCol="GA", family="poisson", link="log",
+    predictionCol="exp_goals_conceded", maxIter=100, regParam=float(POIS_PARAMS["regParam"])
+).fit(scaler.transform(train_fe))
+pred_test = pois_model.transform(scaler.transform(pred_test))
+pred_test = (pred_test
+             .withColumn("p1_pois", F.exp(-F.col("exp_goals_conceded")))
+             .withColumn("prediction_pois", (F.col("p1_pois") >= F.lit(float(POIS_PARAMS["threshold"]))).cast("double")))
 
 
 
@@ -207,7 +244,7 @@ if CFG["CALIBRATE_RF"]:
         featuresCol="features", labelCol="cs", weightCol="class_weight",
         predictionCol="pred_rf_cal", rawPredictionCol="raw_rf_cal",
         probabilityCol="prob_rf_cal",
-        numTrees=200, maxDepth=10, seed=CFG["SEED"]
+        seed=CFG["SEED"], **RF_PARAMS
     ).fit(sub_train)
     valid_scored = rf_cal.transform(valid)
 
@@ -261,43 +298,24 @@ pred_test = pred_test.withColumn(
 
 
 # 9) metrics 
-be_roc = BinaryClassificationEvaluator(labelCol="cs", rawPredictionCol="raw_lr", metricName="areaUnderROC")
-be_pr  = BinaryClassificationEvaluator(labelCol="cs", rawPredictionCol="raw_lr", metricName="areaUnderPR")
-
-# lr metrics
-lr_auc = float(be_roc.evaluate(pred_test))
-lr_pra = float(be_pr.evaluate(pred_test))
-mce = MulticlassClassificationEvaluator(labelCol="cs", predictionCol="prediction_lr", metricName="accuracy")
-lr_acc = float(mce.evaluate(pred_test))
-for m in ["weightedPrecision", "weightedRecall", "f1"]:
-    mce.setMetricName(m)
-    val = float(mce.evaluate(pred_test))
-    if m == "weightedPrecision": lr_prec = val
-    if m == "weightedRecall":   lr_rec  = val
-    if m == "f1":                lr_f1   = val
-lr_brier = float(brier_score(pred_test, "p1_lr"))
-
-# rf metrics
-be_roc.setParams(rawPredictionCol="raw_rf")
-be_pr.setParams(rawPredictionCol="raw_rf")
-rf_auc = float(be_roc.evaluate(pred_test))
-rf_pra = float(be_pr.evaluate(pred_test))
-mce.setParams(predictionCol="prediction_rf", metricName="accuracy")
-rf_acc = float(mce.evaluate(pred_test))
-for m in ["weightedPrecision", "weightedRecall", "f1"]:
-    mce.setMetricName(m)
-    val = float(mce.evaluate(pred_test))
-    if m == "weightedPrecision": rf_prec = val
-    if m == "weightedRecall":   rf_rec  = val
-    if m == "f1":                rf_f1   = val
-rf_brier = float(brier_score(pred_test, "p1_rf_calib"))
+# Precision / Recall / F1 are for the clean-sheet class (cs = 1), the outcome being forecast
+def model_metrics(name, raw_col, pred_col, prob_col):
+    row = {"Model": name}
+    for key, metric in [("ROC_AUC", "areaUnderROC"), ("PR_AUC", "areaUnderPR")]:
+        row[key] = float(BinaryClassificationEvaluator(
+            labelCol="cs", rawPredictionCol=raw_col, metricName=metric).evaluate(pred_test))
+    for key, metric in [("Accuracy", "accuracy"), ("Precision", "precisionByLabel"),
+                        ("Recall", "recallByLabel"), ("F1", "fMeasureByLabel")]:
+        row[key] = float(MulticlassClassificationEvaluator(
+            labelCol="cs", predictionCol=pred_col, metricName=metric, metricLabel=1.0).evaluate(pred_test))
+    row["Brier"] = float(brier_score(pred_test, prob_col))
+    return row
 
 import pandas as pd
 metrics_pd = pd.DataFrame([
-    dict(Model="LR", ROC_AUC=lr_auc, PR_AUC=lr_pra, Accuracy=lr_acc,
-         Precision=lr_prec, Recall=lr_rec, F1=lr_f1, Brier=lr_brier),
-    dict(Model="RF", ROC_AUC=rf_auc, PR_AUC=rf_pra, Accuracy=rf_acc,
-         Precision=rf_prec, Recall=rf_rec, F1=rf_f1, Brier=rf_brier),
+    model_metrics("LR", "raw_lr", "prediction_lr", "p1_lr"),
+    model_metrics("RF", "raw_rf", "prediction_rf", "p1_rf_calib"),
+    model_metrics("Poisson", "p1_pois", "prediction_pois", "p1_pois"),
 ])
 write_csv_pd(metrics_pd, "model_metrics.csv")
 
@@ -307,11 +325,13 @@ write_csv_pd(metrics_pd, "model_metrics.csv")
 # 10) export predictions
 keep_cols = [
     "Date", "Season", "Team", "Opponent", "Venue", "home", "cs",
-    "p1_lr", "p1_rf", "p1_rf_calib", "prediction_lr", "prediction_rf", "readiness_band"
+    "p1_lr", "p1_rf", "p1_rf_calib", "prediction_lr", "prediction_rf", "readiness_band",
+    "exp_goals_conceded", "p1_pois", "prediction_pois"
 ]
 pred_pdf = (pred_test.select(*keep_cols)
             .withColumn("prediction_lr", F.col("prediction_lr").cast("int"))
             .withColumn("prediction_rf", F.col("prediction_rf").cast("int"))
+            .withColumn("prediction_pois", F.col("prediction_pois").cast("int"))
             .toPandas())
 pred_pdf.sort_values("Date", inplace=True)
 write_csv_pd(pred_pdf, "model_predictions.csv")
