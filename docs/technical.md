@@ -58,7 +58,11 @@ Confusion matrices on the test seasons: rows are the actual outcome (1 = clean s
 - **Size**: 3,800 team-match rows from 2020/21 to 2024/25 (5 seasons, 28 teams). Each match appears twice, once from each team's side.
 - **Columns used**: date, season, team, opponent, venue, goals for and against, xG and xGA, shots, shots on target and possession.
 - **Cleaning**: Inter appears as "Internazionale" in the `Team` column but "Inter" in `Opponent`. The code standardises both to "Inter". Without this, the mirror join fails and Inter's matches drop out.
-- **Early-season rows**: rows without five previous matches are dropped.
+- **Rows without history**: 44 rows are dropped because the team or opponent has no earlier match to learn from (mostly each team's first appearance). A team's first few matches use fewer than five previous games.
+- **Quirks in the source**:
+  - **Awarded match:** Roma vs Hellas Verona (19 Sep 2020) was awarded 3–0 to Verona and has no xG.
+  - **Extra match:** 2022/23 includes the Spezia vs Hellas Verona relegation tie-breaker.
+  - **Missing match:** 2024/25 is missing one Fiorentina vs Inter match.
 
 ## Running and tuning
 
