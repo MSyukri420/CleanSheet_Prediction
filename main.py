@@ -37,7 +37,7 @@ CFG = {
     "CSV_PATH": args.csv_path,
     "OUT_DIR": args.out_dir,
     "N_BACK": 5,
-    "TEST_SEASON_START": 2024,   
+    "TEST_SEASON_START": 2024,   # tuning/tune.py validates on the season before this (keep in sync)
     "SEED": 15,
     "WITH_WEIGHTS": True,
     "CALIBRATE_RF": True,

@@ -1,18 +1,18 @@
 {
   "lr": {
-    "regParam": 0.1,
-    "elasticNetParam": 0.0,
+    "regParam": 0.01,
+    "elasticNetParam": 1.0,
     "maxIter": 100,
     "threshold": 0.45
   },
   "rf": {
-    "numTrees": 200,
+    "numTrees": 800,
     "maxDepth": 6,
-    "minInstancesPerNode": 5,
-    "featureSubsetStrategy": "log2"
+    "minInstancesPerNode": 1,
+    "featureSubsetStrategy": "auto"
   },
   "poisson": {
     "regParam": 0.1,
-    "threshold": 0.25
+    "threshold": 0.2
   }
 }

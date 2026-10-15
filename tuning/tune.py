@@ -5,7 +5,9 @@
 Time-aware hyperparameter tuning for Serie A clean-sheet model (PySpark).
 - Matches main.py: true SoT_conceded, leak-free rollings, OneHotEncoder
 - Split modes:
-    * percentile (default): Train+Val vs Test by date percentile; Train vs Val inside earlier slice
+    * main (default): same seasons as main.py; Val = season before main.py's test seasons,
+      Train = all earlier seasons; main.py's test seasons are never used for selection
+    * percentile: Train+Val vs Test by date percentile; Train vs Val inside earlier slice
     * season: Test = last season, Val = previous season, Train = all earlier seasons
 - Searches compact grids:
     * LR: regParam, elasticNetParam; tunes threshold for F1(positive) on validation
@@ -47,7 +49,9 @@ def parse_args():
     p.add_argument("--window", type=int, default=5)
     p.add_argument("--out_dir", type=str, default=TUNING_DIR)
     p.add_argument("--seed", type=int, default=42)
-    p.add_argument("--split_mode", type=str, default="percentile", choices=["percentile","season"],
+    p.add_argument("--test_season_start", type=int, default=2024,
+                   help="main mode: first season of main.py's test set (keep in sync with main.py TEST_SEASON_START)")
+    p.add_argument("--split_mode", type=str, default="main", choices=["main","percentile","season"],
                    help="percentile: use date percentiles; season: last season=test, prev=train/val split by season")
     p.add_argument("--train_ratio", type=float, default=0.8, help="Boundary between train+val and test for percentile mode")
     p.add_argument("--val_within_train", type=float, default=0.8, help="Boundary within earlier slice (train vs val) for percentile mode")
@@ -206,10 +210,21 @@ def split_season(df):
     # Fallback: if train is empty, fold val into train and split by percentile
     if df_train.count() == 0:
         earlier = df.filter(F.col("season_start") < last_season)
-        t, v, _, (_, b2) = split_percentile(earlier, train_ratio=0.8, val_within_train=0.8)
+        t, v, _, (_, _, b2) = split_percentile(earlier, train_ratio=0.8, val_within_train=0.8)
         return t, v, df_test, ("season-fallback", last_season, b2)
 
     return df_train, df_val, df_test, ("season", last_season, prev_season)
+
+
+def split_main(df, test_season_start):
+    # Same boundary as main.py: seasons >= test_season_start are main.py's test set and are never
+    # used here; the season just before it is validation, everything earlier is training.
+    # (Season = end year, e.g. 2023 for 2022/23)
+    val_season = test_season_start - 1
+    df_train = df.filter(F.col("Season") < val_season)
+    df_val = df.filter(F.col("Season") == val_season)
+    df_test = df.filter(F.col("Season") >= test_season_start)
+    return df_train, df_val, df_test, ("main", val_season, test_season_start)
 
 
 # -----------------------------
@@ -284,7 +299,9 @@ def main():
     df = add_rollings(df, args.window)
 
     # Splits
-    if args.split_mode == "season":
+    if args.split_mode == "main":
+        train, val, test, meta = split_main(df, args.test_season_start)
+    elif args.split_mode == "season":
         train, val, test, meta = split_season(df)
     else:
         train, val, test, meta = split_percentile(df, args.train_ratio, args.val_within_train)
